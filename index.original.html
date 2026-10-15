@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lift &amp; Fuel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Silkscreen:wght@400;700&display=swap">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="var(--protein)" stroke-width="4"/><circle cx="15" cy="15" r="7" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="15" cy="15" r="2.5" fill="var(--ink)"/></svg>
+      <h1>Lift &amp; Fuel</h1>
+      <button class="lvchip" id="lvChip" type="button" aria-label="Open quests">Lv 1</button>
+    </div>
+    <nav class="datenav" aria-label="Choose day">
+      <button class="iconbtn" id="prevDay" aria-label="Previous day">‹</button>
+      <span class="when" id="whenLabel">Today</span>
+      <button class="iconbtn" id="nextDay" aria-label="Next day">›</button>
+      <input type="date" id="dateInput" aria-label="Pick a date">
+      <button class="btn" id="todayBtn">Today</button>
+    </nav>
+  </header>
+
+  <div class="summary" aria-live="polite">
+    <section>
+      <span class="label" id="kcalLabel">Calories</span>
+      <div class="big num" id="sumKcal">0<small>/ 2,180 kcal</small></div>
+      <div class="bar" id="kcalBar"><i style="width:0"></i></div>
+      <span class="hint" id="kcalLeft">2,180 kcal left</span>
+    </section>
+    <section>
+      <span class="label">Macros</span>
+      <div id="sumMacros"></div>
+    </section>
+    <section>
+      <span class="label">Training</span>
+      <div class="stats" id="sumTrain"></div>
+      <span class="hint" id="trainNote"></span>
+    </section>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="quests" aria-selected="true">Quests</button>
+    <button role="tab" data-tab="food" aria-selected="false">Food</button>
+    <button role="tab" data-tab="training" aria-selected="false">Training</button>
+    <button role="tab" data-tab="progress" aria-selected="false">Progress</button>
+    <button role="tab" data-tab="goals" aria-selected="false">Goals</button>
+  </div>
+
+  <!-- QUESTS -->
+  <div class="panel" id="tab-quests">
+    <div class="box hero">
+      <div class="stagewrap">
+        <div>
+          <button class="stage" id="stage" type="button" aria-label="Tap your hero">
+            <canvas id="scene" width="96" height="64"></canvas>
+            <span class="namebar pix" id="nameBar">Kai</span>
+            <span class="foe pix" id="foeBar" hidden></span>
+            <span class="xpfloat" id="xpFloat" hidden></span>
+          </button>
+          <div class="dialog" role="status" aria-live="polite"><span class="who pix" id="dlgWho">KAI</span><p id="dlgText"></p></div>
+        </div>
+        <div class="acts">
+          <button class="btn sm" type="button" id="actHigh">High five</button>
+          <button class="btn sm" type="button" id="actFlex">Flex</button>
+          <button class="btn sm" type="button" id="actPep">Pep talk</button>
+        </div>
+      </div>
+      <div class="who" id="who"></div>
+      <div class="statgrid" id="statGrid"></div>
+    </div>
+
+    <details class="box" id="wardrobe">
+      <summary><span class="h2">Wardrobe</span><span class="hint num" id="wardCount"></span></summary>
+      <div class="tabs" id="wardTabs" role="tablist">
+        <button type="button" data-ward="outfit" aria-selected="true">Outfit</button>
+        <button type="button" data-ward="head" aria-selected="false">Head</button>
+        <button type="button" data-ward="gear" aria-selected="false">Gear</button>
+        <button type="button" data-ward="scene" aria-selected="false">Scene</button>
+        <button type="button" data-ward="look" aria-selected="false">Look</button>
+      </div>
+      <div id="wardBody"></div>
+    </details>
+
+    <div class="qgrid">
+      <div class="box">
+        <div class="box-h"><h2 id="questTitle">Today's quests</h2><span class="hint num" id="questCount"></span></div>
+        <div class="meter" id="questMeter" aria-hidden="true"></div>
+        <span class="hint" id="questRule"></span>
+        <div class="quests" id="questList"></div>
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <span class="hint" id="restNote"></span>
+          <div class="field" style="flex:0 1 200px"><label for="sessSel">Session for this day</label><select id="sessSel"></select></div>
+        </div>
+      </div>
+      <div class="qcol">
+        <div class="box">
+          <div class="box-h"><h2>Weekly boss</h2><span class="hint num" id="bossWeek"></span></div>
+          <div class="boss"><canvas id="bossCv" width="64" height="48" aria-label="Iron Colossus"></canvas>
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><b class="pix" id="bossName">Iron Colossus</b><div class="hp" id="bossHp"></div><span class="hint" id="bossTxt"></span></div></div>
+        </div>
+        <div class="box">
+          <div class="box-h"><h2>Supplement stack</h2><span class="hint num" id="stackCount"></span></div>
+          <div id="stackList" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+        <div class="box">
+          <h2>Recovery</h2>
+          <div class="rec">
+            <div class="rec-h"><b>Water</b><span class="num hint" id="waterTxt"></span></div>
+            <div class="bar" id="waterBar"><i style="width:0"></i></div>
+            <div class="row" style="gap:6px">
+              <button class="btn sm" type="button" data-water="8">+8 oz</button>
+              <button class="btn sm" type="button" data-water="16">+16 oz</button>
+              <button class="btn sm" type="button" data-water="24">+24 oz</button>
+              <button class="btn sm" type="button" data-water="-8" aria-label="Remove 8 ounces">−8</button>
+            </div>
+          </div>
+          <form id="sleepForm" class="row" autocomplete="off">
+            <div class="field" style="flex:1 1 130px"><label for="sleepVal" id="sleepLabel">Sleep the night before (hours)</label><input id="sleepVal" type="number" min="0" max="16" step="0.25" inputmode="decimal" required></div>
+            <button class="btn" type="submit">Save</button>
+          </form>
+          <form id="stepsForm" class="row" autocomplete="off">
+            <div class="field" style="flex:1 1 130px"><label for="stepsVal">Steps</label><input id="stepsVal" type="number" min="0" step="1" inputmode="numeric" required></div>
+            <button class="btn" type="submit">Save</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="box-h"><h2>Streak log</h2><span class="hint">Last 28 days · tap a day to open it</span></div>
+      <div class="strip" id="streakStrip"></div>
+      <div class="legend">
+        <span><i style="background:var(--vit)"></i>Every quest</span>
+        <span><i style="background:color-mix(in srgb,var(--vit) 55%,var(--track))"></i>Cleared</span>
+        <span><i style="background:color-mix(in srgb,var(--frost) 60%,var(--track))"></i>Saved by a freeze</span>
+        <span><i style="background:color-mix(in srgb,var(--warn) 35%,var(--track))"></i>Missed</span>
+      </div>
+    </div>
+    <div class="box">
+      <div class="box-h"><h2>Achievements</h2><span class="hint num" id="achCount"></span></div>
+      <div class="ach" id="achList"></div>
+    </div>
+  </div>
+
+  <!-- FOOD -->
+  <div class="panel" id="tab-food" hidden>
+    <div class="box">
+      <div class="box-h"><h2>Meal plan</h2><span class="hint" id="planDay"></span></div>
+      <div id="planList"></div>
+      <span class="hint" id="planNote"></span>
+    </div>
+    <div class="box">
+      <h2>Log food</h2>
+      <form id="foodForm" class="row" autocomplete="off">
+        <div class="field w-meal"><label for="fMeal">Meal</label>
+          <select id="fMeal"><option>Breakfast</option><option>Meal 2</option><option>Lunch</option><option>Meal 4</option><option>Pre-workout</option><option>Post-workout</option><option>Dinner</option><option>Snacks</option></select></div>
+        <div class="field w-name"><label for="fName">Food</label><input id="fName" required placeholder="e.g. Chicken breast, 4 oz"></div>
+        <div class="field w-n"><label for="fKcal">kcal</label><input id="fKcal" type="number" min="0" step="1" inputmode="numeric" required></div>
+        <div class="field w-n"><label for="fP">Protein g</label><input id="fP" type="number" min="0" step="0.1" inputmode="decimal"></div>
+        <div class="field w-n"><label for="fC">Carbs g</label><input id="fC" type="number" min="0" step="0.1" inputmode="decimal"></div>
+        <div class="field w-n"><label for="fF">Fat g</label><input id="fF" type="number" min="0" step="0.1" inputmode="decimal"></div>
+        <div class="field w-n"><label for="fQty">Servings</label><input id="fQty" type="number" min="0.25" step="0.25" value="1" inputmode="decimal"></div>
+        <button class="btn primary" type="submit">Add</button>
+      </form>
+      <div>
+        <div class="label" id="quickLabel" style="margin-bottom:6px">Quick add</div>
+        <div class="chips" id="quickFoods"></div>
+      </div>
+    </div>
+    <div class="box">
+      <h2>Meals</h2>
+      <div id="mealList"></div>
+    </div>
+  </div>
+
+  <!-- TRAINING -->
+  <div class="panel" id="tab-training" hidden>
+    <div class="box">
+      <div class="box-h"><h2>Hybrid week</h2><span class="hint num" id="weekMeta"></span></div>
+      <div class="week" id="weekStrip"></div>
+    </div>
+    <div class="box" id="sessBox">
+      <div class="box-h"><h2 id="sessTitle">Session</h2><span class="hint" id="sessMeta"></span></div>
+      <p class="note" id="sessGoal"></p>
+      <div id="sessBody"></div>
+    </div>
+    <div class="box">
+      <h2>Log exercises</h2>
+      <form id="exForm" class="row" autocomplete="off">
+        <div class="field w-name"><label for="exName">Exercise</label><input id="exName" list="exList" required placeholder="e.g. Bench press"></div>
+        <button class="btn primary" type="submit">Add exercise</button>
+      </form>
+      <datalist id="exList"></datalist>
+      <div class="row" id="copyRow"></div>
+    </div>
+    <div class="panel" id="exercises"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="panel" id="tab-progress" hidden>
+    <div class="box">
+      <div class="box-h"><h2>Body check-in</h2><span class="hint" id="checkHint">Once a week, same time of day</span></div>
+      <form id="checkForm" class="row" autocomplete="off">
+        <div class="field" style="flex:1 1 140px"><label for="waistVal" id="waistLabel">Waist at navel (in)</label><input id="waistVal" type="number" min="10" max="80" step="0.25" inputmode="decimal"></div>
+        <div class="field" style="flex:1 1 120px"><label for="neckVal" id="neckLabel">Neck (in)</label><input id="neckVal" type="number" min="8" max="30" step="0.25" inputmode="decimal"></div>
+        <div class="field" style="flex:1 1 140px"><label for="bfVal">Body fat % (scan)</label><input id="bfVal" type="number" min="3" max="60" step="0.1" inputmode="decimal" placeholder="Blank = tape estimate"></div>
+        <button class="btn primary" type="submit">Save check-in</button>
+        <button class="btn" type="button" id="photoBtn" aria-pressed="false">Took progress photos</button>
+      </form>
+      <div class="kv" id="bodyStats"></div>
+      <span class="hint" id="bodyHint"></span>
+      <div class="chart" id="waistChart" style="max-width:560px"></div>
+    </div>
+    <div class="box">
+      <h2>Last 7 days</h2>
+      <div class="kv" id="weekStats"></div>
+    </div>
+    <div class="box">
+      <h2>Calories, last 14 days</h2>
+      <div class="chart" id="kcalChart"></div>
+    </div>
+    <div class="grid2">
+      <div class="box">
+        <h2>Body weight</h2>
+        <form id="wForm" class="row" autocomplete="off">
+          <div class="field" style="flex:1 1 140px"><label for="wVal" id="wLabel">Weigh-in (lb)</label><input id="wVal" type="number" min="0" step="0.1" inputmode="decimal" required></div>
+          <button class="btn primary" type="submit">Save</button>
+        </form>
+        <div class="chart" id="wChart"></div>
+      </div>
+      <div class="box">
+        <h2>Personal records</h2>
+        <div id="prs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="panel" id="tab-goals" hidden>
+    <div class="box">
+      <h2>Daily targets</h2>
+      <form id="goalForm" class="row" autocomplete="off">
+        <div class="field w-n" style="flex-basis:100px"><label for="gK">Training kcal</label><input id="gK" type="number" min="800" step="10" required></div>
+        <div class="field w-n" style="flex-basis:100px"><label for="gP">Protein g</label><input id="gP" type="number" min="0" step="1" required></div>
+        <div class="field w-n" style="flex-basis:100px"><label for="gC">Carbs g</label><input id="gC" type="number" min="0" step="1" required></div>
+        <div class="field w-n" style="flex-basis:100px"><label for="gF">Fat g</label><input id="gF" type="number" min="0" step="1" required></div>
+        <div class="field w-n" style="flex-basis:100px"><label for="gRK">Rest kcal</label><input id="gRK" type="number" min="800" step="10" required></div>
+        <div class="field w-n" style="flex-basis:100px"><label for="gRC">Rest carbs g</label><input id="gRC" type="number" min="0" step="1" required></div>
+        <div class="field w-n" style="flex-basis:100px"><label for="gRF">Rest fat g</label><input id="gRF" type="number" min="0" step="1" required></div>
+        <div class="field w-n" style="flex-basis:110px"><label for="gU">Weight unit</label><select id="gU"><option value="lb">lb</option><option value="kg">kg</option></select></div>
+        <button class="btn primary" type="submit">Save targets</button>
+      </form>
+      <span class="hint" id="macroCheck"></span>
+    </div>
+    <div class="box">
+      <h2>Quest settings</h2>
+      <div class="field"><label>Weekly layout (Off / Mobility days use rest-day targets; the long-run day adds fuel)</label><div class="row" id="weekLayout"></div></div>
+      <form id="gameForm" class="row" autocomplete="off">
+        <div class="field w-n" style="flex-basis:110px"><label for="gWater">Water goal oz</label><input id="gWater" type="number" min="16" step="4" required></div>
+        <div class="field w-n" style="flex-basis:110px"><label for="gSleep">Sleep goal h</label><input id="gSleep" type="number" min="4" max="12" step="0.25" required></div>
+        <div class="field w-n" style="flex-basis:110px"><label for="gSteps">Step goal</label><input id="gSteps" type="number" min="1000" step="500" required></div>
+        <div class="field w-n" style="flex-basis:110px"><label for="gH" id="gHLabel">Height (in)</label><input id="gH" type="number" min="40" max="250" step="0.5" required></div>
+        <div class="field w-n" style="flex-basis:110px"><label for="gBF">Body-fat goal %</label><input id="gBF" type="number" min="5" max="35" step="0.5" required></div>
+        <button class="btn primary" type="submit">Save settings</button>
+      </form>
+      <span class="hint">Clear 3 out of every 4 quests in a day to keep your streak. Every 7 days in a row earns a streak freeze (hold up to 2), which covers one missed day automatically.</span>
+    </div>
+    <div class="box">
+      <h2>Supplement stack</h2>
+      <div id="stackEdit"></div>
+      <form id="stackForm" class="row" autocomplete="off">
+        <div class="field w-name" style="flex-basis:160px"><label for="sName">Supplement</label><input id="sName" required placeholder="e.g. Vitamin C"></div>
+        <div class="field" style="flex:1 1 100px"><label for="sDose">Dose</label><input id="sDose" placeholder="e.g. 500 mg"></div>
+        <div class="field" style="flex:1 1 110px"><label for="sSlot">When</label><select id="sSlot"><option>Morning</option><option>Pre-gym</option><option>Evening</option></select></div>
+        <button class="btn primary" type="submit">Add</button>
+      </form>
+      <span class="hint">Pre-gym items only count on training days.</span>
+    </div>
+    <div class="box">
+      <h2>Estimate my targets</h2>
+      <p class="hint" style="margin:0">A starting point from the Mifflin–St Jeor equation. Adjust after 2–3 weeks based on how your weight actually moves.</p>
+      <form id="estForm" class="row" autocomplete="off">
+        <div class="field w-n" style="flex-basis:96px"><label for="eSex">Sex</label><select id="eSex"><option value="m">Male</option><option value="f">Female</option></select></div>
+        <div class="field w-n"><label for="eAge">Age</label><input id="eAge" type="number" min="14" max="100" value="23"></div>
+        <div class="field w-n" style="flex-basis:96px"><label for="eH" id="eHLabel">Height (in)</label><input id="eH" type="number" min="0" step="0.5" value="65"></div>
+        <div class="field w-n" style="flex-basis:96px"><label for="eW" id="eWLabel">Weight (lb)</label><input id="eW" type="number" min="0" step="0.1" value="180"></div>
+        <div class="field" style="flex:1 1 170px"><label for="eAct">Activity</label><select id="eAct">
+          <option value="1.2">Mostly sitting</option><option value="1.375">Train 1–3 days/wk</option><option value="1.55" selected>Train 3–5 days/wk</option><option value="1.725">Train 6–7 days/wk</option></select></div>
+        <div class="field" style="flex:1 1 150px"><label for="eGoal">Goal</label><select id="eGoal">
+          <option value="-500" selected>Lose fat (~1 lb/wk)</option><option value="0">Maintain / recomp</option><option value="250">Build muscle (lean bulk)</option></select></div>
+      </form>
+      <div class="est" id="estOut"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span id="saveState" class="status">Connecting to your log…</span>
+    <span>Estimated 1RM uses the Epley formula.</span>
+  </div>
+</div>
+
+<button class="dock" id="dock" type="button" aria-label="Your lifter. Open quests" hidden><canvas id="dockCv" width="32" height="30"></canvas></button>
+<div class="dockbubble" id="dockBubble" role="status" aria-live="polite" hidden></div>
+
+<script src="legacy/sprites.js"></script>
+<script src="legacy/app.js"></script>
+</body>
+</html>
